@@ -1,0 +1,32 @@
+<div class="decryption-container">
+  <!-- Action Button -->
+  <button 
+    (click)="onViewDecryptedReport()" 
+    [disabled]="isLoading || !filename"
+    class="decrypt-btn">
+    <span *ngIf="!isLoading">View Decrypted Report</span>
+    <span *ngIf="isLoading" class="spinner-container">
+      <span class="spinner"></span> Decrypting...
+    </span>
+  </button>
+
+  <!-- Error Alerts -->
+  <div *ngIf="errorMessage" class="error-alert">
+    <div class="error-header">
+      <span class="error-icon">⚠️</span>
+      <strong>Decryption Failed</strong>
+    </div>
+    <p class="error-body">{{ errorMessage }}</p>
+  </div>
+
+  <!-- Decrypted Report Viewer -->
+  <div *ngIf="decryptedData" class="report-viewer">
+    <div class="viewer-header">
+      <span class="shield-icon">🛡️</span>
+      <span class="viewer-title">Decrypted Vulnerability Report: {{ filename }}</span>
+    </div>
+    <div class="viewer-body">
+      <pre><code>{{ jsonString }}</code></pre>
+    </div>
+  </div>
+</div>

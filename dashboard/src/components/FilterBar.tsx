@@ -40,37 +40,40 @@ export function FilterBar({ findings, filters, onFilterChange }: Props) {
   const hasActiveFilters = (filters.severity?.length ?? 0) > 0 || (filters.rule?.length ?? 0) > 0 || filters.hasPatch !== null
 
   return (
-    <div className="px-6 py-5 border-b border-white/[0.08] bg-white/[0.03]">
-      <div className="flex items-center justify-between mb-4">
+    <div className="px-6 py-6 border-b" style={{ background: 'rgba(255,255,255,0.02)' }}>
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-500/20 p-2 rounded-lg">
-            <Filter className="w-4 h-4 text-blue-400" />
+          <div style={{ background: 'rgba(59, 130, 246, 0.2)', padding: '0.5rem', borderRadius: '8px' }}>
+            <Filter style={{ width: '16px', height: '16px', color: '#60a5fa' }} />
           </div>
-          <span className="text-sm font-medium text-gray-300">Filters</span>
+          <span className="text-sm font-medium text-main">Filters</span>
         </div>
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-xs text-muted hover-lift"
           >
-            <X className="w-3 h-3" />
+            <X style={{ width: '12px', height: '12px' }} />
             Clear all
           </button>
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-6">
+      <div className="flex flex-wrap items-center gap-8">
         {/* Severity Filter */}
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">Severity:</span>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-muted font-medium" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Severity:</span>
           <div className="flex gap-2">
             {(['critical', 'high', 'medium', 'low'] as Severity[]).map((sev) => (
               <button
                 key={sev}
                 onClick={() => toggleSeverity(sev)}
-                className={`badge ${severityConfig[sev].badge} transition-all duration-200 hover:scale-105 ${
-                  filters.severity?.includes(sev) ? 'ring-2 ring-offset-2 ring-offset-dark-800 ring-blue-500/30' : 'opacity-60 hover:opacity-100'
-                }`}
+                className={`badge ${severityConfig[sev].badge} hover-lift`}
+                style={{
+                  opacity: filters.severity?.includes(sev) ? 1 : 0.6,
+                  transform: filters.severity?.includes(sev) ? 'scale(1.05)' : 'none',
+                  boxShadow: filters.severity?.includes(sev) ? '0 0 0 2px var(--bg-dark), 0 0 0 4px rgba(59,130,246,0.3)' : 'none'
+                }}
               >
                 {severityConfig[sev].label}
               </button>
@@ -80,8 +83,8 @@ export function FilterBar({ findings, filters, onFilterChange }: Props) {
 
         {/* Rule Filter */}
         {rules.length > 0 && (
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">Rule:</span>
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-muted font-medium" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rule:</span>
             <select
               value={filters.rule?.[0] || ''}
               onChange={(e) => {
@@ -91,19 +94,20 @@ export function FilterBar({ findings, filters, onFilterChange }: Props) {
                   rule: value ? [value] : []
                 })
               }}
-              className="glass-input py-1.5 text-xs min-w-[140px]"
+              className="input-glass"
+              style={{ padding: '4px 8px', minWidth: '140px', fontSize: '0.75rem' }}
             >
-              <option value="" className="bg-dark-800">All rules</option>
+              <option value="" style={{ background: 'var(--bg-dark)' }}>All rules</option>
               {rules.map((rule) => (
-                <option key={rule} value={rule} className="bg-dark-800">{rule}</option>
+                <option key={rule} value={rule} style={{ background: 'var(--bg-dark)' }}>{rule}</option>
               ))}
             </select>
           </div>
         )}
 
         {/* Patch Filter */}
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">Fixes:</span>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-muted font-medium" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Fixes:</span>
           <div className="flex gap-2">
             {[
               { label: 'All', value: null },
@@ -113,11 +117,12 @@ export function FilterBar({ findings, filters, onFilterChange }: Props) {
               <button
                 key={String(option.value)}
                 onClick={() => setHasPatch(option.value as boolean | null)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                className="btn-glass hover-lift"
+                style={
                   filters.hasPatch === option.value
-                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
-                    : 'bg-white/[0.03] text-gray-400 border border-white/[0.08] hover:bg-white/[0.05]'
-                }`}
+                    ? { background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.4)' }
+                    : { background: 'rgba(255,255,255,0.03)', color: 'var(--text-muted)' }
+                }
               >
                 {option.label}
               </button>

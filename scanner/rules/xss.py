@@ -48,6 +48,9 @@ class XSSRule:
         """Analyze file for XSS vulnerabilities."""
         findings = []
 
+        if file_path.suffix not in ['.js', '.jsx', '.ts', '.tsx']:
+            return findings
+
         if source is None:
             try:
                 source = file_path.read_text(encoding='utf-8')

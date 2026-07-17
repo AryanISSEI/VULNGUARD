@@ -16,6 +16,10 @@ from pathlib import Path
 from typing import List, Optional
 from dataclasses import dataclass
 
+# Import report encryption functions
+from scanner.encryption.report_encryption import encrypt_report, decrypt_for_ai
+
+
 
 @dataclass
 class EncryptionFinding:

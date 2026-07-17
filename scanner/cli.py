@@ -30,22 +30,6 @@ def scan_local_files(args) -> int:
 
     result = scanner.scan(args.path)
 
-    # Also scan HTML/CSS/JS files if present
-    html_scanner = HTMLFileScanner()
-    html_extensions = {'.html', '.htm', '.css'}
-
-    for file_path in args.path.rglob('*'):
-        if file_path.suffix in html_extensions:
-            if file_path.suffix in ['.html', '.htm']:
-                findings = html_scanner.scan_html_file(str(file_path))
-            elif file_path.suffix == '.css':
-                findings = html_scanner.scan_css_file(str(file_path))
-
-            # Convert WebFinding to Finding format
-            for wf in findings:
-                # Add to findings list (will need adapter)
-                pass
-
     # Generate summary
     if not args.quiet:
         print()
@@ -202,6 +186,17 @@ async def scan_website_async(url: str, args) -> int:
 
 
 def main():
+    import sys
+    if hasattr(sys.stdout, 'reconfigure'):
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+        except Exception:
+            pass
+    if hasattr(sys.stderr, 'reconfigure'):
+        try:
+            sys.stderr.reconfigure(encoding='utf-8')
+        except Exception:
+            pass
     parser = argparse.ArgumentParser(
         prog='vuln-scan',
         description='VulnGuard Security Scanner - Scan code and websites for vulnerabilities',

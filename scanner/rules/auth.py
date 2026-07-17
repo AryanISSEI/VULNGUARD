@@ -9,7 +9,7 @@ from scanner.findings import Finding, Patch, Severity, Confidence, CodeLocation
 class AuthRule:
     """Detect authentication misconfigurations in Python/FastAPI and JavaScript."""
 
-    RULE_ID = "AUTH-001"
+    RULE_ID = "PY-AUTH-001"
     RULE_NAME = "Authentication Issue"
 
     # JWT security issues
@@ -378,7 +378,7 @@ class AuthRule:
             # Check for default/example values
             if re.search(r'=(changeme|password|secret|default|admin|123456)', line, re.IGNORECASE):
                 finding = Finding(
-                    id=f"AUTH-ENV-{line_num}",
+                    id=f"AUTH-ENV-{i}",
                     rule_id=self.RULE_ID,
                     rule_name="Weak Environment Value",
                     severity=Severity.HIGH,
