@@ -1,0 +1,6 @@
+{
+  "fail_on": "high",
+  "rules": ["sqli", "xss", "auth"],
+  "exclude": ["tests/", "migrations/", "node_modules/", ".venv/"],
+  "include": []
+}

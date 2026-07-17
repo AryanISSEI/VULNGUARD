@@ -1,0 +1,192 @@
+name: 'Fix-First Security Scan'
+description: 'Scans code for vulnerabilities and generates fix-ready patches'
+author: 'Your Name'
+
+inputs:
+  path:
+    description: 'Path to scan'
+    required: false
+    default: '.'
+
+  fail-on:
+    description: 'Minimum severity to fail build (critical, high, medium, low, none)'
+    required: false
+    default: 'high'
+
+  github-token:
+    description: 'GitHub token for PR comments'
+    required: false
+    default: ${{ github.token }}
+
+  sarif-output:
+    description: 'Path for SARIF output'
+    required: false
+    default: 'vuln-scan-results.sarif'
+
+  pr-comments:
+    description: 'Post findings as PR comments (true/false)'
+    required: false
+    default: 'true'
+
+  apply-fixes:
+    description: 'Auto-apply high-confidence fixes (true/false)'
+    required: false
+    default: 'false'
+
+outputs:
+  findings-count:
+    description: 'Total number of vulnerabilities found'
+
+  critical-count:
+    description: 'Number of critical severity findings'
+
+  high-count:
+    description: 'Number of high severity findings'
+
+  patches-available:
+    description: 'Number of auto-fixes available'
+
+  sarif-path:
+    description: 'Path to SARIF report'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install scanner
+      shell: bash
+      run: |
+        pip install ${{ github.action_path }}/..
+
+    - name: Run security scan
+      id: scan
+      shell: bash
+      run: |
+        vuln-scan \
+          --path "${{ inputs.path }}" \
+          --fail-on "${{ inputs.fail-on }}" \
+          --sarif "${{ inputs.sarif-output }}" \
+          --json "scan-results.json"
+      continue-on-error: true
+
+    - name: Parse results
+      id: results
+      shell: python
+      run: |
+        import json
+        import os
+
+        try:
+            with open('scan-results.json') as f:
+                results = json.load(f)
+
+            summary = results['summary']
+
+            # Set outputs
+            with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+                print(f'findings-count={summary["total"]}', file=fh)
+                print(f'critical-count={summary["critical"]}', file=fh)
+                print(f'high-count={summary["high"]}', file=fh)
+                print(f'patches-available={summary["patches_available"]}', file=fh)
+                print(f'sarif-path=${{ inputs.sarif-output }}', file=fh)
+
+            # Set summary
+            with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as fh:
+                print('## Security Scan Results', file=fh)
+                print(f'- **Total Findings:** {summary["total"]}', file=fh)
+                print(f'- Critical: {summary["critical"]}', file=fh)
+                print(f'- High: {summary["high"]}', file=fh)
+                print(f'- Medium: {summary["medium"]}', file=fh)
+                print(f'- Low: {summary["low"]}', file=fh)
+                print(f'- **Patches Available:** {summary["patches_available"]}', file=fh)
+        except Exception as e:
+            print(f"Error parsing results: {e}")
+
+    - name: Upload SARIF
+      if: inputs.sarif-output != ''
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ inputs.sarif-output }}
+        category: fix-first-scanner
+
+    - name: Post PR comments
+      if: inputs.pr-comments == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const findings = JSON.parse(fs.readFileSync('scan-results.json', 'utf8')).findings;
+
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number
+          });
+
+          // Find existing bot comments to update
+          const botPrefix = '🔒 **Fix-First Security Scan**';
+
+          for (const finding of findings.slice(0, 10)) { // Limit to 10 comments
+            const body = generateComment(finding);
+
+            // Check for existing comment
+            const existing = comments.find(c => c.body.includes(finding.id));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+          }
+
+          function generateComment(finding) {
+            const severityEmoji = {
+              'critical': '🚨',
+              'high': '🔴',
+              'medium': '🟡',
+              'low': '🟢'
+            }[finding.severity] || '⚪';
+
+            let body = `${botPrefix}\n\n`;
+            body += `${severityEmoji} **${finding.rule}** (${finding.severity})\n\n`;
+            body += `${finding.message}\n\n`;
+            body += `**Location:** \`${finding.file}:${finding.line}\`\n\n`;
+            body += '**Vulnerable code:**\n';
+            body += '```\n' + finding.snippet + '\n```\n';
+
+            if (finding.patch) {
+              body += '\n**Suggested fix:**\n';
+              body += '```\n' + finding.patch.fixed_code + '\n```\n';
+              body += `\n*Why this works:* ${finding.patch.explanation}\n`;
+            }
+
+            body += `\n<!-- ${finding.id} -->`;
+            return body;
+          }
+
+    - name: Apply fixes
+      if: inputs.apply-fixes == 'true'
+      shell: bash
+      run: |
+        vuln-scan --path "${{ inputs.path }}" --apply-fixes
+
+    - name: Check failure
+      if: steps.scan.outcome == 'failure'
+      shell: bash
+      run: |
+        echo "Security scan found vulnerabilities at or above '${{ inputs.fail-on }}' severity"
+        exit 1
