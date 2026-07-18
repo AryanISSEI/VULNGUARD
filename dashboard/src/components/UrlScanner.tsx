@@ -16,7 +16,8 @@ export function UrlScanner({ onUpload }: Props) {
 
     setIsScanning(true)
     try {
-      const response = await fetch('http://localhost:8000/scan-url', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/scan-url`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
