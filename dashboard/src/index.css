@@ -33,6 +33,33 @@
     --color-primary-hover: #e2e8f0;
   }
 
+  [data-theme='forest'] {
+    --color-bg: #021a11;
+    --color-surface: #052e16;
+    --color-surface-hover: #064e3b;
+    --color-border: #064e3b;
+    --color-primary: #ecfdf5;
+    --color-primary-hover: #a7f3d0;
+  }
+
+  [data-theme='ocean'] {
+    --color-bg: #041423;
+    --color-surface: #082f49;
+    --color-surface-hover: #0c4a6e;
+    --color-border: #0c4a6e;
+    --color-primary: #f0f9ff;
+    --color-primary-hover: #bae6fd;
+  }
+
+  [data-theme='nebula'] {
+    --color-bg: #150921;
+    --color-surface: #2e1065;
+    --color-surface-hover: #3b0764;
+    --color-border: #3b0764;
+    --color-primary: #f5f3ff;
+    --color-primary-hover: #ddd6fe;
+  }
+
   body {
     background-color: var(--color-bg);
     color: #e5e7eb;

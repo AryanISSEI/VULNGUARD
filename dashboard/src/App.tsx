@@ -71,6 +71,9 @@ function App() {
       filtered = filtered.filter(f => (f.patch !== null) === filters.hasPatch)
     }
 
+    const severityMap: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3, info: 4 }
+    filtered.sort((a, b) => (severityMap[a.severity] ?? 99) - (severityMap[b.severity] ?? 99))
+
     setFilteredFindings(filtered)
   }, [results, filters])
 
@@ -100,6 +103,9 @@ function App() {
         <option value="obsidian">Obsidian</option>
         <option value="midnight">Midnight</option>
         <option value="slate">Slate</option>
+        <option value="forest">Forest</option>
+        <option value="ocean">Ocean</option>
+        <option value="nebula">Nebula</option>
       </select>
     </div>
   )
@@ -122,10 +128,10 @@ function App() {
           </div>
         </header>
 
-        {/* Ambient Gradient Background */}
-        <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-indigo-900/20 via-purple-900/5 to-transparent pointer-events-none -z-10" />
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none -z-10" />
-        <div className="absolute top-[20%] right-[-10%] w-[40%] h-[60%] rounded-full bg-purple-500/10 blur-[120px] pointer-events-none -z-10" />
+        {/* Ambient Flowing Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-purple-900/10 to-slate-900/20 bg-[length:200%_200%] animate-flow pointer-events-none -z-10" />
+        <div className="absolute top-[20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none -z-10 animate-pulse-slow" />
+        <div className="absolute top-[50%] right-[-10%] w-[40%] h-[60%] rounded-full bg-purple-500/10 blur-[120px] pointer-events-none -z-10 animate-pulse-slow" style={{ animationDelay: '1s' }} />
 
         {/* Hero Section */}
         <main className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12 relative z-10">
@@ -196,7 +202,10 @@ function App() {
   const hasFailures = results.summary.critical > 0 || results.summary.high > 0
 
   return (
-    <div className="min-h-screen relative bg-background">
+    <div className="min-h-screen relative bg-background overflow-hidden">
+      {/* Ambient Flowing Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-purple-900/10 to-slate-900/20 bg-[length:200%_200%] animate-flow pointer-events-none -z-10" />
+      
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">

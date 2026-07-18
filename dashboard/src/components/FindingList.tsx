@@ -317,14 +317,14 @@ function FindingCard({ finding }: { finding: Finding }) {
   const Icon = config.icon
 
   return (
-    <div className={`border-b border-border last:border-b-0 transition-colors ${expanded ? 'bg-surface-hover' : ''}`}>
+    <div className={`border-b border-border last:border-b-0 transition-colors ${expanded ? 'bg-surface-hover/80' : 'hover:bg-surface-hover/40'}`}>
       <div
-        className="p-4 hover:bg-surface-hover transition-colors cursor-pointer group"
+        className="p-5 sm:p-6 cursor-pointer group"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-start gap-4">
-          <div className={`${config.badge}`}>
-            <Icon className="w-4 h-4" />
+          <div className={`pro-badge ${config.badge} shrink-0`}>
+            <Icon className="w-4 h-4 shrink-0" />
             <span className="uppercase tracking-wider">{finding.severity}</span>
           </div>
 
@@ -489,7 +489,9 @@ export function FindingList({ findings, totalCount }: Props) {
         </p>
         <div className="flex items-center gap-2">
           {findings.some(f => f.severity === 'critical') && (
-            <span className="badge badge-critical">Action Required</span>
+            <span className="pro-badge pro-badge-critical animate-pulse">
+              <AlertOctagon className="w-3.5 h-3.5" /> Action Required
+            </span>
           )}
         </div>
       </div>
