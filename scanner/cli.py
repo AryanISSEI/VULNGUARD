@@ -30,6 +30,22 @@ def scan_local_files(args) -> int:
 
     result = scanner.scan(args.path)
 
+    # Also scan HTML/CSS/JS files if present
+    html_scanner = HTMLFileScanner()
+    html_extensions = {'.html', '.htm', '.css'}
+
+    for file_path in args.path.rglob('*'):
+        if file_path.suffix in html_extensions:
+            if file_path.suffix in ['.html', '.htm']:
+                findings = html_scanner.scan_html_file(str(file_path))
+            elif file_path.suffix == '.css':
+                findings = html_scanner.scan_css_file(str(file_path))
+
+            # Convert WebFinding to Finding format
+            for wf in findings:
+                # Add to findings list (will need adapter)
+                pass
+
     # Generate summary
     if not args.quiet:
         print()
@@ -40,6 +56,9 @@ def scan_local_files(args) -> int:
         sarif_data = result.to_sarif()
         with open(args.sarif, 'w') as f:
             json.dump(sarif_data, f, indent=2)
+        if getattr(args, 'encrypt_report', False):
+            from scanner.encryption.report_encryption import encrypt_report
+            encrypt_report(args.sarif)
         if not args.quiet:
             print(f"\nSARIF report exported to: {args.sarif}")
 
@@ -78,6 +97,9 @@ def scan_local_files(args) -> int:
         }
         with open(args.json, 'w') as f:
             json.dump(json_data, f, indent=2)
+        if getattr(args, 'encrypt_report', False):
+            from scanner.encryption.report_encryption import encrypt_report
+            encrypt_report(args.json)
         if not args.quiet:
             print(f"JSON report exported to: {args.json}")
 
@@ -186,17 +208,6 @@ async def scan_website_async(url: str, args) -> int:
 
 
 def main():
-    import sys
-    if hasattr(sys.stdout, 'reconfigure'):
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
-    if hasattr(sys.stderr, 'reconfigure'):
-        try:
-            sys.stderr.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
     parser = argparse.ArgumentParser(
         prog='vuln-scan',
         description='VulnGuard Security Scanner - Scan code and websites for vulnerabilities',
@@ -266,6 +277,11 @@ Examples:
         action='store_true',
         help='Suppress output (useful for CI)'
     )
+    local_parser.add_argument(
+        '--encrypt-report',
+        action='store_true',
+        help='Encrypt the generated JSON and SARIF reports'
+    )
 
     # === WEB SCAN MODE ===
     web_parser = subparsers.add_parser('web', help='Scan a website')
@@ -322,6 +338,7 @@ Examples:
             args.apply_fixes = False
             args.config = None
             args.quiet = False
+            args.encrypt_report = False
         exit_code = scan_local_files(args)
         sys.exit(exit_code)
 

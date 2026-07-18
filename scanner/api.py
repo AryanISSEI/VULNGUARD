@@ -4,9 +4,6 @@ from pathlib import Path
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from dotenv import load_dotenv
-
-load_dotenv()
 
 from scanner.core import Scanner
 from scanner.vuln_intel import enrich_finding
@@ -137,64 +134,6 @@ async def scan_url_endpoint(request: UrlRequest):
     }
     
     return json_data
-
-class RepoRequest(BaseModel):
-    url: str
-
-@app.post("/scan-repo")
-async def scan_repo_endpoint(request: RepoRequest):
-    """
-    Clones and scans a public Git repository.
-    """
-    import asyncio
-    from scanner.repo_scanner import clone_and_scan
-    from fastapi import HTTPException
-    
-    try:
-        loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(None, clone_and_scan, request.url)
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.get("/api/reports/decrypt/{filename}")
-async def decrypt_report_endpoint(filename: str):
-    """
-    Reads an encrypted vulnerability report file, decrypts it using the master key,
-    and returns the plaintext report.
-    """
-    from fastapi import HTTPException
-    from scanner.encryption.report_encryption import decrypt_for_ai
-    
-    # Path traversal check
-    if "/" in filename or "\\" in filename or ".." in filename:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid filename. Directory traversal is not allowed."
-        )
-        
-    file_path = Path.cwd() / filename
-    
-    if not file_path.exists():
-        raise HTTPException(
-            status_code=404,
-            detail=f"Report file '{filename}' not found."
-        )
-        
-    try:
-        plaintext = decrypt_for_ai(file_path)
-        try:
-            import json
-            return json.loads(plaintext)
-        except json.JSONDecodeError:
-            return {"raw_text": plaintext}
-    except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Decryption failed: {str(e)}"
-        )
-
-
 
 if __name__ == "__main__":
     uvicorn.run("scanner.api:app", host="0.0.0.0", port=8000, reload=True)

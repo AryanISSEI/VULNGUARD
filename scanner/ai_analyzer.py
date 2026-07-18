@@ -177,6 +177,21 @@ SAFEGUARD_CHECKLISTS = {
         {"step": "Disable unnecessary HTTP methods (TRACE, OPTIONS)", "priority": "low"},
         {"step": "Audit server config against CIS benchmarks regularly", "priority": "low"},
     ],
+    "CRYPTO-HARDCODED-KEY": [
+        {"step": "Move all secrets and keys to environment variables", "priority": "critical"},
+        {"step": "Use a secure key management service (AWS KMS, HashiCorp Vault)", "priority": "critical"},
+        {"step": "Rotate the compromised keys immediately across all systems", "priority": "high"},
+        {"step": "Audit version control history to scrub exposed keys", "priority": "high"},
+    ],
+    "CRYPTO-WEAK-HASH": [
+        {"step": "Upgrade hashing algorithms to SHA-256 or SHA-3 for data integrity", "priority": "high"},
+        {"step": "Use bcrypt, scrypt, or Argon2 for hashing user passwords", "priority": "critical"},
+        {"step": "Ensure a cryptographically secure random salt is used per hash", "priority": "high"},
+    ],
+    "CRYPTO-INSECURE-RANDOM": [
+        {"step": "Replace standard math random functions with cryptographically secure ones", "priority": "high"},
+        {"step": "Use the 'secrets' module in Python or 'crypto' in Node.js", "priority": "high"},
+    ],
 }
 
 
@@ -208,6 +223,22 @@ ATTACK_TECHNIQUES = {
         "SSL Stripping (MITM)",
         "MIME Sniffing Exploitation",
         "Cross-Origin Data Theft",
+    ],
+    "CRYPTO-HARDCODED-KEY": [
+        "Source Code Reversing / Decompilation",
+        "Binary Analysis Data Extraction",
+        "Unauthorized Decryption",
+    ],
+    "CRYPTO-WEAK-HASH": [
+        "Hash Collision Attack",
+        "Rainbow Table Attack",
+        "Brute Force Cracking",
+        "Length Extension Attack",
+    ],
+    "CRYPTO-INSECURE-RANDOM": [
+        "PRNG State Prediction",
+        "Session Token Guessing",
+        "Cryptographic Key Recovery",
     ],
 }
 

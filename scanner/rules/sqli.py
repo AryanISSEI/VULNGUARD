@@ -36,9 +36,6 @@ class SQLInjectionRule:
         """Analyze a file for SQL injection vulnerabilities."""
         findings = []
 
-        if file_path.suffix != '.py':
-            return findings
-
         node = self.parser.parse(file_path)
         if not node:
             return findings

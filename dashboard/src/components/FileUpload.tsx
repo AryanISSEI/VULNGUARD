@@ -82,19 +82,23 @@ export function FileUpload({ onUpload }: Props) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className="relative"
-      style={{ cursor: 'pointer', transition: 'transform 0.5s ease', transform: isDragActive ? 'scale(1.02)' : 'none' }}
+      className={`relative group cursor-pointer transition-all duration-500 ${
+        isDragActive ? 'scale-105' : ''
+      }`}
     >
+      {/* Glow Effect */}
       <div
-        className="text-center hover-lift"
-        style={{
-          border: '2px dashed',
-          borderColor: isDragActive ? 'var(--color-primary)' : 'var(--border-glass)',
-          background: isDragActive ? 'rgba(139, 92, 246, 0.1)' : 'rgba(255, 255, 255, 0.02)',
-          borderRadius: '16px',
-          padding: '2.5rem',
-          transition: 'all 0.3s ease'
-        }}
+        className={`absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-xl transition-opacity duration-500 ${
+          isDragActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'
+        }`}
+      />
+
+      <div
+        className={`relative border-2 border-dashed rounded-2xl p-10 transition-all duration-300 ${
+          isDragActive
+            ? 'border-blue-400 bg-blue-500/10'
+            : 'border-white/[0.08] bg-white/[0.02] group-hover:border-white/[0.15] group-hover:bg-white/[0.04]'
+        }`}
       >
         <input
           type="file"
@@ -103,32 +107,32 @@ export function FileUpload({ onUpload }: Props) {
           className="hidden"
           id="file-upload"
         />
-        <label htmlFor="file-upload" style={{ cursor: 'pointer', display: 'block' }}>
-          <div>
+        <label htmlFor="file-upload" className="cursor-pointer block">
+          <div className="text-center">
             {isDragActive ? (
               <>
-                <div style={{ width: '64px', height: '64px', margin: '0 auto 1rem auto', borderRadius: '16px', background: 'rgba(139, 92, 246, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Upload style={{ width: '32px', height: '32px', color: 'var(--color-primary)' }} />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                  <Upload className="w-8 h-8 text-blue-400" />
                 </div>
-                <p style={{ color: 'var(--color-primary)', fontWeight: 500, fontSize: '1.125rem' }}>Drop the file here</p>
+                <p className="text-blue-400 font-medium text-lg">Drop the file here</p>
               </>
             ) : (
               <>
-                <div style={{ width: '64px', height: '64px', margin: '0 auto 1rem auto', borderRadius: '16px', background: 'rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <FileJson style={{ width: '32px', height: '32px', color: 'var(--text-muted)' }} />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/[0.08] flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <FileJson className="w-8 h-8 text-gray-400 group-hover:text-blue-400 transition-colors" />
                 </div>
-                <p style={{ color: '#e2e8f0', fontWeight: 500, fontSize: '1.125rem', marginBottom: '0.25rem' }}>
+                <p className="text-gray-300 font-medium text-lg mb-1">
                   Drop a codebase or scan result
                 </p>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+                <p className="text-gray-500 text-sm mb-6">
                   Supports JSON, SARIF, and raw source code (.py, .js, .java, etc)
                 </p>
                 <div className="flex items-center justify-center gap-2">
-                  <span className="badge" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-glass)', color: 'var(--text-muted)' }}>
+                  <span className="px-3 py-1.5 rounded-lg bg-white/[0.05] text-xs text-gray-400 border border-white/[0.08]">
                     Any Code File
                   </span>
-                  <span className="badge badge-success">
-                    <Sparkles style={{ width: '12px', height: '12px' }} />
+                  <span className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/10 text-xs text-green-400 border border-green-500/20">
+                    <Sparkles className="w-3 h-3" />
                     AI Analysis
                   </span>
                 </div>

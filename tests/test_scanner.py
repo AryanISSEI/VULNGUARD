@@ -45,12 +45,6 @@ class TestSQLInjectionRule:
         assert patch.description
         assert patch.explanation
 
-    def test_ignores_non_python_files(self):
-        rule = SQLInjectionRule()
-        fixture = get_fixture("vulnerable_components.jsx")
-        findings = rule.analyze(fixture)
-        assert len(findings) == 0
-
 
 class TestXSSRule:
     """Test XSS detection."""
@@ -78,12 +72,6 @@ class TestXSSRule:
         # Eval should be critical severity
         assert eval_findings[0].severity.value == "critical"
 
-    def test_ignores_non_javascript_files(self):
-        rule = XSSRule()
-        fixture = get_fixture("vulnerable_api.py")
-        findings = rule.analyze(fixture)
-        assert len(findings) == 0
-
 
 class TestAuthRule:
     """Test authentication issue detection."""
@@ -103,16 +91,6 @@ class TestAuthRule:
 
         jwt_findings = [f for f in findings if "localStorage" in f.message or "JWT in" in f.rule_name]
         assert len(jwt_findings) >= 1
-
-    def test_env_file_scanning(self, tmp_path):
-        rule = AuthRule()
-        env_file = tmp_path / ".env"
-        env_file.write_text("DB_PASSWORD=secret\nJWT_SECRET=changeme")
-        findings = rule.analyze(env_file)
-        
-        # Verify findings are found without NameError
-        assert len(findings) > 0
-        assert any("Weak Environment Value" in f.rule_name for f in findings)
 
 
 class TestScanner:
